@@ -14,53 +14,61 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
+import androidx.compose.foundation.layout.*;
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            StockMonkeyTheme {
-                Scaffold(modifier = Modifier.fillMaxWidth()) { innerPadding ->
-                    TitleCard(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                    StyleBar(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                    StockList(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            Holder()
+//            StockMonkeyTheme {
+//                Scaffold(modifier = Modifier.fillMaxWidth()) { innerPadding ->
+//                    TitleCard(
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                    StyleBar(
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                    StockList(
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
+//            }
         }
     }
 }
 
 @Composable
-fun TitleCard(name: String, modifier: Modifier = Modifier) {
+fun Holder(){
+    Column() {
+        TitleCard()
+        StyleBar()
+        StockListTopper()
+    }
+}
+
+@Composable
+fun TitleCard(modifier: Modifier = Modifier) {
     Text(
         text = "Home Page",
-        modifier = modifier.padding(horizontal = 150.dp, vertical = 50.dp)
+        modifier = modifier.padding(horizontal = 150.dp, vertical = 5.dp)
     )
 }
 
 @Composable
-fun StyleBar(name: String, modifier: Modifier = Modifier) {
+fun StyleBar(modifier: Modifier = Modifier) {
     Text(
         text = "------------",
-        modifier = modifier.padding(horizontal = 150.dp, vertical = 25.dp)
+        modifier = modifier.padding(horizontal = 165.dp, vertical = 5.dp)
     )
 }
 
 @Composable
-fun StockList(name: String, modifier: Modifier = Modifier) {
+fun StockListTopper(modifier: Modifier = Modifier) {
     Text(
-        text = "Start List",
-        modifier = modifier.padding(horizontal = 150.dp)
+        text = "Stock List",
+        modifier = modifier.padding(horizontal = 160.dp, vertical = 5.dp)
     )
 }
 
@@ -68,6 +76,6 @@ fun StockList(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun HomePreview() {
     StockMonkeyTheme {
-        TitleCard("Android")
+        TitleCard()
     }
 }
