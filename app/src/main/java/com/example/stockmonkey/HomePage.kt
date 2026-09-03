@@ -85,6 +85,18 @@ fun AddStockButton(onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun RemoveStockButton(onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center, // you apply alignment to all children
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(onClick = { onClick() }) {
+            Text("-")
+        }
+    }
+}
+
 
 
 var stupidList = ArrayList<String>()
@@ -106,6 +118,7 @@ fun StockList(stocks: ArrayList<String>){
     stupidList = setupStupidList()
     Column {
         AddStockButton {  }
+        RemoveStockButton {  }
         for (i in stocks) {
             Stock(i)
         }
