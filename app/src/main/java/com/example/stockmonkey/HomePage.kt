@@ -1,7 +1,7 @@
 package com.example.stockmonkey
 
 import android.os.Bundle
-import android.os.Message
+
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
-import androidx.compose.foundation.layout.*;
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.ui.Alignment
 
@@ -24,27 +24,16 @@ class HomePage : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Holder()
-//            StockMonkeyTheme {
-//                Scaffold(modifier = Modifier.fillMaxWidth()) { innerPadding ->
-//                    TitleCard(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                    StyleBar(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                    StockList(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-//            }
+            StockMonkeyTheme {
+                Holder()
+            }
         }
     }
 }
 
 @Composable
 fun Holder(){
-    Column() {
+    Column {
         TitleCard()
         StyleBar()
         StockListTopper()
@@ -102,11 +91,11 @@ var stupidList = ArrayList<String>()
 
 //This is temporary code to set up the dummy information
 // that will be replaced by the stocklist in the database
-fun SetupStupidList(): ArrayList<String> {
+fun setupStupidList(): ArrayList<String> {
     stupidList.clear()
     stupidList.add("Apple")
     stupidList.add("Alphabet")
-    return stupidList;
+    return stupidList
 }
 
 @Composable
@@ -114,11 +103,11 @@ fun StockList(stocks: ArrayList<String>){
     //Create an add button at the top.
 
     //For list of all the things make a stock object
-    stupidList = SetupStupidList()
-    Column() {
+    stupidList = setupStupidList()
+    Column {
         AddStockButton {  }
         for (i in stocks) {
-            Stock(i);
+            Stock(i)
         }
     }
 }
