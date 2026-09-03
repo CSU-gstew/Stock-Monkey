@@ -96,14 +96,25 @@ fun AddStockButton(onClick: () -> Unit) {
     }
 }
 
-val stupidList = ArrayList<String>()
+
+
+var stupidList = ArrayList<String>()
+
+//This is temporary code to set up the dummy information
+// that will be replaced by the stocklist in the database
+fun SetupStupidList(): ArrayList<String> {
+    stupidList.clear()
+    stupidList.add("Apple")
+    stupidList.add("Alphabet")
+    return stupidList;
+}
+
 @Composable
 fun StockList(stocks: ArrayList<String>){
     //Create an add button at the top.
 
     //For list of all the things make a stock object
-    stupidList.add("Apple")
-    stupidList.add("Alphabet")
+    stupidList = SetupStupidList()
     Column() {
         AddStockButton {  }
         for (i in stocks) {
