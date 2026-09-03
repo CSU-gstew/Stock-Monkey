@@ -14,13 +14,10 @@ class LoginActivity : AppCompatActivity() {
         val btnLogin = findViewById<MaterialButton>(R.id.btnLoginSubmit)
         val btnCreateAccount = findViewById<MaterialButton>(R.id.btnGoToSignUp)
 
-        // Redirects to MainActivity when Login is clicked
         btnLogin.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish() // Prevents going back to the login screen on back press
+            startActivity(Intent(this, HomePage::class.java))
+            finish()
         }
-
-        // Redirects to SignUpActivity when Create Account is clicked
         btnCreateAccount.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
         }
