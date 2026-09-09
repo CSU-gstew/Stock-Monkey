@@ -8,6 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
+
+
 data class Stock (
     val name: String,
     val ticker: String,
@@ -15,10 +17,14 @@ data class Stock (
 )
 
 interface MarketStackApiService {
-    //Not sure where to put in
+    //Not sure where to put in api key and limit.
     @GET("tickers/{ticker}/eod?")
     suspend fun getStock(@Path("ticker") ticker: String): Stock
 }
+
+//Create intercept function for the api_key.
+
+
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.marketstack.com/v2/"

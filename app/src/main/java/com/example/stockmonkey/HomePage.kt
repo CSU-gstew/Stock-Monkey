@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import android.util.Log;
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -81,6 +82,18 @@ fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
         text = stock.name + "(" + stock.ticker + ")" + ", Price: " + stock.closingPrice,
         modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
     )
+}
+
+fun PullStock(){
+    suspend fun getStock(ticker: String): Result<Stock> {
+        return try {
+            val newStock = RetrofitClient.api.getStock(ticker)
+            return Result.success(newStock)
+        } catch (e: Exception) {
+            Log.e("API", "Error Pulling Stock Data", e)
+            return Result.failure(e)
+        }
+    }
 }
 
 @Composable
