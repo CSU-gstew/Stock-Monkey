@@ -1,29 +1,41 @@
 package com.example.stockmonkey
 
-import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
-
+import retrofit2.http.Query
 
 
 data class Stock (
     val name: String,
-    val ticker: String,
-    var closingPrice: Float,
+    val symbol: String,
+    var close: Float,
 )
 
 interface MarketStackApiService {
     //Not sure where to put in api key and limit.
-    @GET("tickers/{ticker}/eod?")
-    suspend fun getStock(@Path("ticker") ticker: String): Stock
+    @GET("tickers/{ticker}/eod")
+    suspend fun getStock(
+        @Path("ticker") ticker: String,
+        @Query("access_key") accessKey: String,
+        @Query("limit") limit: Int = 1
+    ): Stock
+
+
 }
 
 //Create intercept function for the api_key.
-
+private fun apiKeyAsHeader(it: Interceptor.Chain) = it.proceed(
+    it.request()
+        .newBuilder()
+        //Replace hard coded api_key with SharedPreferences
+        .addHeader("access_key", "4a6b33927a52a24f9c5d0462bf03d876")
+        .build()
+)
 
 
 object RetrofitClient {
@@ -36,6 +48,7 @@ object RetrofitClient {
     // Create OkHttp client with interceptor
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .addInterceptor { apiKeyAsHeader(it) }
         .build()
     // Create Retrofit instance
     val api: MarketStackApiService = Retrofit.Builder()

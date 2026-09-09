@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.util.Log;
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,21 +78,9 @@ fun StupidStockDisplay(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     Text(
-        text = stock.name + "(" + stock.ticker + ")" + ", Price: " + stock.closingPrice,
+        text = stock.name + "(" + stock.symbol + ")" + ", Price: " + stock.close,
         modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
     )
-}
-
-fun PullStock(){
-    suspend fun getStock(ticker: String): Result<Stock> {
-        return try {
-            val newStock = RetrofitClient.api.getStock(ticker)
-            return Result.success(newStock)
-        } catch (e: Exception) {
-            Log.e("API", "Error Pulling Stock Data", e)
-            return Result.failure(e)
-        }
-    }
 }
 
 @Composable
@@ -121,6 +108,19 @@ fun StockButtons(onClick: () -> Unit){
 //    }
 //}
 
+//Tries to asynchronously pull a single stock object
+suspend fun pullStock(ticker: String): Result<Stock> {
+    try {
+        val newStock = RetrofitClient.api.getStock(ticker = ticker,
+            accessKey = "Your API KEY HERE"
+            )
+        return Result.success(newStock)
+    } catch (e: Exception) {
+        Log.e("API", "Error Pulling Stock Data", e)
+        return Result.failure(e)
+    }
+}
+
 var stupidList = ArrayList<String>()
 
 var stockList = ArrayList<Stock>()
@@ -134,21 +134,32 @@ fun setupStupidList(): ArrayList<String> {
     return stupidList
 }
 
+//Tries to pull from the api all the stocks by calling getStock
 //This will be replaced by pulling from the database to make the stock list
-fun setupStockList(): ArrayList<Stock> {
+suspend fun setupStockList(): ArrayList<Stock> {
     stockList.clear()
-    val appleTest = Stock("Apple", "AAPL", 1000.0f)
-    stockList.add(appleTest)
+//    val appleTest = Stock("Apple", "AAPL", 1000.0f)
+//    stockList.add(appleTest)
+
+    //Temporarily only pulls Apple
+    // will add stuff later to pull everything from the database to add to here
+    pullStock("AAPL")
+        .onSuccess { stock -> stockList.add(stock)
+        Log.e("API", stock.toString())}
+        .onFailure { error ->
+            Log.e("API", "Failed to load stock", error) }
+
     return stockList
 }
 
 @Composable
 fun StockList(stocks: ArrayList<Stock>){
-    //Create an add button at the top.
+    //Get the stock information asynchronously
+    LaunchedEffect(Unit) {
+        stockList = setupStockList()
+    }
 
-    //For list of all the things make a stock object
-    stupidList = setupStupidList()
-    stockList = setupStockList()
+    //Display all the stocks in a collumn
     Column {
         for (i in stocks) {
             StockDisplay(i)
