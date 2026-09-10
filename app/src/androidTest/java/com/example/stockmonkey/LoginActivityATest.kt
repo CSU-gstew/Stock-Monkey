@@ -29,7 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class LoginActivityTest {
+class LoginActivityATest {
 
     private lateinit var db: UserDatabase
     private lateinit var dao: UserDao

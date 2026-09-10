@@ -1,19 +1,17 @@
 package com.example.stockmonkey;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import com.example.stockmonkey.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivityA extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login_a);
 
         ImageButton btnMenu = findViewById(R.id.btnMenu);
         TextView tvGoToSignUp = findViewById(R.id.tvGoToSignUp);
