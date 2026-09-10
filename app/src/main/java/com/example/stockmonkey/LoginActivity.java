@@ -35,11 +35,5 @@ public class LoginActivity extends AppCompatActivity {
             });
             popup.show();
         });
-
-        // 회원가입 화면으로 이동 링크
-        tvGoToSignUp.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-            startActivity(intent);
-        });
     }
 }

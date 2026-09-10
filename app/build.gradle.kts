@@ -61,4 +61,6 @@ dependencies {
 
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
+
+    implementation("com.google.android.material:material:1.12.0")
 }
