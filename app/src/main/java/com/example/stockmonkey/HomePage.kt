@@ -1,5 +1,6 @@
 package com.example.stockmonkey
 
+import android.content.SharedPreferences
 import android.os.Bundle
 
 import androidx.activity.ComponentActivity
@@ -123,7 +124,7 @@ fun StockButtons(onClick: () -> Unit){
 suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
-            accessKey = "YOUR ACCESS KEY"
+            accessKey = "YOUR ACESS KEY"
             )
 
         return Result.success(newStock)
