@@ -1,11 +1,19 @@
 package com.example.stockmonkey
 
 import android.content.Context
+import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
+import androidx.room3.ProvidedColumnTypeConverter
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 
-@Database(entities = [UserItem::class], version = 1, exportSchema = false)
+@Database(
+    entities = [UserItem::class],
+    version = 1,
+    exportSchema = true,
+)
+@ColumnTypeConverters(StockTickerConverter::class)
 abstract class UserDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
 
