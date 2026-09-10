@@ -1,12 +1,14 @@
 package com.example.stockmonkey
 
 import android.content.Context
-import androidx.room3.AutoMigration
 import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
-import androidx.room3.ProvidedColumnTypeConverter
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteConnection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
     entities = [UserItem::class],
@@ -28,7 +30,7 @@ abstract class UserDatabase : RoomDatabase() {
                     context.applicationContext,
                     UserDatabase::class.java,
                     "app_database"
-                ).build()
+                ).addCallback(Callback(context.applicationContext)).build()
                 INSTANCE = instance
                 instance
                 /*
@@ -38,5 +40,21 @@ abstract class UserDatabase : RoomDatabase() {
                  */
             }
         }
+
+        private class Callback(private val context: Context): RoomDatabase.Callback(){
+            override suspend fun onCreate(connection: SQLiteConnection) {
+                super.onCreate(connection)
+                //INSTANCE?.let {
+                    CoroutineScope(Dispatchers.IO).launch{
+                        val dao = getDatabase(context).userDao()
+                        if(dao.getAllUsers().isEmpty()){
+                            val testUser = UserItem(0,"TestUser", "12345", listOf<StockTicker>())
+                            dao.insertAll(testUser)
+                        }
+                    }
+                //}
+            }
+        }
     }
 }
+

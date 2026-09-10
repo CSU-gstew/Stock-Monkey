@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,6 +31,9 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CoroutineScope(Dispatchers.IO).launch{
+            val initRun = UserDatabase.getDatabase(this@LoginActivity).userDao().getAllUsers()
+        }
         enableEdgeToEdge()
 
         val userDao = UserDatabase.getDatabase(this).userDao()
@@ -44,10 +48,6 @@ class LoginActivity : ComponentActivity() {
                             }
 
                             if (user == null) {
-                                //Temp Code to add to database in case it didn't work on ur end..... idk how to push da table
-                                //To Use -> try to log in and when the app says "User does not exist" it'll create
-                                //val testUser = UserItem(0,"TestUser", "1234", listOf<StockTicker>())
-                                //userDao.insertAll(testUser)
                                 onError("User does not exist", null)
                             } else if (user.password != password) {
                                 onError(null, "Incorrect password")
