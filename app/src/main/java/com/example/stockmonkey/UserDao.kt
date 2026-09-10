@@ -37,6 +37,12 @@ interface UserDao {
     )
     suspend fun getUserWID(id: Int): UserItem
 
+    //Slight Addition to let you select a user with their username so it's easier to search for login:
+    @Query(
+        """SELECT * FROM user_item_table WHERE username = :username LIMIT 1"""
+    )
+    suspend fun getUserWUsername(username: String): UserItem?
+
     // Returns all users as a list
     @Query("""SELECT * FROM user_item_table""")
     suspend fun getAllUsers(): List<UserItem>
