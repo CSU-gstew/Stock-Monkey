@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.util.Log;
+import android.widget.Toast
+import androidx.compose.runtime.setValue;
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +19,8 @@ import com.example.stockmonkey.ui.theme.StockMonkeyTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,12 +36,18 @@ class HomePage : ComponentActivity() {
 
 @Composable
 fun Holder(){
+    var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
+
+    LaunchedEffect(Unit) {
+        stocks = setupStockList()
+    }
+
     Column {
         TitleCard()
         StyleBar()
         StockListTopper()
         StockButtons {  }
-        StockList(stockList)
+        StockList(stocks)
     }
 }
 
@@ -112,8 +123,9 @@ fun StockButtons(onClick: () -> Unit){
 suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
-            accessKey = "Your API KEY HERE"
+            accessKey = "YOUR ACCESS KEY"
             )
+
         return Result.success(newStock)
     } catch (e: Exception) {
         Log.e("API", "Error Pulling Stock Data", e)
@@ -144,10 +156,11 @@ suspend fun setupStockList(): ArrayList<Stock> {
     //Temporarily only pulls Apple
     // will add stuff later to pull everything from the database to add to here
     pullStock("AAPL")
-        .onSuccess { stock -> stockList.add(stock)
-        Log.e("API", stock.toString())}
+        .onSuccess { stock -> stockList.add(stock)}
         .onFailure { error ->
             Log.e("API", "Failed to load stock", error) }
+
+    Log.d("API", stockList[0].toString())
 
     return stockList
 }
@@ -155,9 +168,9 @@ suspend fun setupStockList(): ArrayList<Stock> {
 @Composable
 fun StockList(stocks: ArrayList<Stock>){
     //Get the stock information asynchronously
-    LaunchedEffect(Unit) {
-        stockList = setupStockList()
-    }
+//    LaunchedEffect(Unit) {
+//        stockList = setupStockList()
+//    }
 
     //Display all the stocks in a collumn
     Column {
