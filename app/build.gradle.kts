@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     kotlin("plugin.serialization") version "2.0.0"
     id("androidx.room3")
+    pmd
 }
 
 android {
@@ -46,6 +47,33 @@ android {
     }
 }
 
+
+pmd {
+    toolVersion = "7.7.0"
+    isIgnoreFailures = false
+}
+
+
+tasks.register<Pmd>("pmd") {
+    description = "Run PMD code analysis across source files"
+    group = "verification"
+    ruleSetFiles = files("${rootProject.rootDir}/config/pmd/ruleset.xml")
+    ruleSets = listOf()
+
+    source = fileTree("src/main/java")
+    include("**/*.java")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+
+tasks.named("check") {
+    dependsOn("pmd")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -70,7 +98,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("com.squareup.okhttp3:logging-interceptor:5.5.0")
 
-    // Rooom Stuff
+    // Room Stuff
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
 
