@@ -108,6 +108,19 @@ fun StockButtons(onClick: () -> Unit){
         }
     }
 }
+
+fun StockTickerToStockConverter(){
+    //Takes a StockTicker object and turns it into a Stock object
+}
+
+fun AddStock(){
+    //Take a stock object and add it to the list.
+}
+
+fun RemoveStock(){
+    //Remove a stock object from the list, and the database
+}
+
 //@Composable
 //fun AddStockButton(onClick: () -> Unit) {
 //    Box(
@@ -160,8 +173,6 @@ suspend fun setupStockList(): ArrayList<Stock> {
         .onSuccess { stock -> stockList.add(stock)}
         .onFailure { error ->
             Log.e("API", "Failed to load stock", error) }
-
-    Log.d("API", stockList[0].toString())
 
     return stockList
 }
