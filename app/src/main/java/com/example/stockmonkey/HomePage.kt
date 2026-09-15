@@ -124,7 +124,7 @@ fun StockButtons(onClick: () -> Unit){
 suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
-            accessKey = "YOUR ACESS KEY"
+            accessKey = "YOUR ACCESS KEY"
             )
 
         return Result.success(newStock)
@@ -160,8 +160,6 @@ suspend fun setupStockList(): ArrayList<Stock> {
         .onSuccess { stock -> stockList.add(stock)}
         .onFailure { error ->
             Log.e("API", "Failed to load stock", error) }
-
-    Log.d("API", stockList[0].toString())
 
     return stockList
 }
