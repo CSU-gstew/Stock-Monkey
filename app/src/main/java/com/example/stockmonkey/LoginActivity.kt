@@ -34,6 +34,12 @@ class LoginActivity : ComponentActivity() {
 
         val userDao = UserDatabase.getDatabase(this).userDao()
 
+        val intent = Intent(this@LoginActivity, HomePage::class.java).apply {
+            putExtra("LOGGED_IN_USER_ID", 0)
+            putExtra("LOGGED_IN_USERNAME", "Jack")
+        }
+        startActivity(intent)
+
         setContent {
             StockMonkeyTheme {
                 LoginHolder(
