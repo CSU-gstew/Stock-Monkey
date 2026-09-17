@@ -1,13 +1,11 @@
 package com.example.stockmonkey
 
-import android.content.SharedPreferences
 import android.os.Bundle
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.util.Log;
-import android.widget.Toast
 import androidx.compose.runtime.setValue;
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.padding
@@ -18,10 +16,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +42,11 @@ class HomePage : ComponentActivity() {
 @Composable
 fun Holder(){
     var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
+
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         stocks = setupStockList()
@@ -47,7 +56,40 @@ fun Holder(){
         TitleCard()
         StyleBar()
         StockListTopper()
-        StockButtons {  }
+        StockButtons (
+            addButton = {
+                showAddDialog = true
+            },
+            removeButton = {
+                showRemoveDialog = true
+            }
+        )
+
+        //This essentially lets the stockTickerDialogue pop up
+        //Then yeet its information into removeStock
+        if (showRemoveDialog) {
+            StockTickerDialog(
+                onDismiss = {
+                    showRemoveDialog = false
+                },
+                onConfirm = { ticker ->
+                    stocks = removeStock(stocks, ticker)
+                    showRemoveDialog = false
+                }
+            )
+        }
+        if (showAddDialog) {
+            StockTickerDialog(
+                onDismiss = {
+                    showAddDialog = false
+                },
+                onConfirm = { ticker ->
+                    scope.launch { stocks = addStock(stocks, ticker) }
+                    showAddDialog = false
+                }
+            )
+        }
+
         StockList(stocks)
     }
 }
@@ -77,16 +119,6 @@ fun StockListTopper(modifier: Modifier = Modifier) {
 
 }
 
-//Testing stock display made before the Stock Object was made.
-@Composable
-fun StupidStockDisplay(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = name,
-        modifier = modifier.padding(horizontal = 160.dp, vertical = 5.dp)
-    )
-}
-
-//Not final display might want to add delete button to it rather than a search based one
 @Composable
 fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     Text(
@@ -95,36 +127,106 @@ fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     )
 }
 
+//Big boy dialogue box that takes in some text input to spit back out the ticker
 @Composable
-fun StockButtons(onClick: () -> Unit){
+fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
+) {
+    var ticker by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            OutlinedTextField(
+                value = ticker,
+                onValueChange = { ticker = it },
+                label = { Text("Stock ticker") },
+                placeholder = { Text("Example: AAPL") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = ticker.isNotBlank(),
+                onClick = {
+                    onConfirm(ticker.trim().uppercase())
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+//This once you press the button + will pull a stock object and add it to the stocks list
+suspend fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
+    //Do a Popup
+    //Store the popup string
+    //Pull a stock object
+    //Add it to the stocks list
+    val newStocks = ArrayList(stocks)
+    Log.d("HomePage", "Inside Add Button")
+
+    //Getting screams due to suspend fuckery will fix later once removeStock works
+    pullStock(ticker)
+        .onSuccess { stock -> newStocks.add(stock)}
+        .onFailure { error ->
+            Log.e("API", "Failed to load stock", error) }
+
+//    val stupidNewStock = Stock("No Name", ticker, 100.0f)
+//    newStocks.add(stupidNewStock)
+
+    return newStocks
+}
+
+//This will pop up ask for a ticker, search the list for it and delete it if possible
+//If not it will send an error message
+fun removeStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
+    //Do a Popup
+    //Store the popup string
+    //Search from the stocks list and remove if if there is a match
+    //Else return an error
+    val newStocks = ArrayList(stocks)
+
+//    Log.d("HomePage", "Inside Remove Button")
+//
+//    Log.d("HomePage", newStocks.toString())
+    for (stock in newStocks){
+        if(stock.symbol == ticker){
+            newStocks.remove(stock)
+        }
+    }
+//    Log.d("HomePage", newStocks.toString())
+    return newStocks
+}
+
+//Holder for the two buttons addStock and removeStock for a slightly prettier look
+@Composable
+fun StockButtons( addButton: () -> Unit, removeButton: () -> Unit
+){
     Row(
         modifier = Modifier.padding(horizontal = 5.dp)
     ) {
-        Button(onClick = { onClick() }) {
+        Button(onClick = addButton) {
             Text("+")
         }
-        Button(onClick = { onClick() }) {
+        Button(onClick = removeButton) {
             Text("-")
         }
     }
 }
-//@Composable
-//fun AddStockButton(onClick: () -> Unit) {
-//    Box(
-//        contentAlignment = Alignment.BottomStart, // you apply alignment to all children
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Button(onClick = { onClick() }) {
-//            Text("+")
-//        }
-//    }
-//}
+
 
 //Tries to asynchronously pull a single stock object
 suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
-            accessKey = "YOUR ACESS KEY"
+            accessKey = ""
             )
 
         return Result.success(newStock)
@@ -134,46 +236,28 @@ suspend fun pullStock(ticker: String): Result<Stock> {
     }
 }
 
-var stupidList = ArrayList<String>()
-
-var stockList = ArrayList<Stock>()
-
-//This is temporary code to set up the dummy information
-// that will be replaced by the stocklist in the database
-fun setupStupidList(): ArrayList<String> {
-    stupidList.clear()
-    stupidList.add("Apple")
-    stupidList.add("Alphabet")
-    return stupidList
-}
-
 //Tries to pull from the api all the stocks by calling getStock
 //This will be replaced by pulling from the database to make the stock list
 suspend fun setupStockList(): ArrayList<Stock> {
+    var stockList = ArrayList<Stock>()
     stockList.clear()
 //    val appleTest = Stock("Apple", "AAPL", 1000.0f)
 //    stockList.add(appleTest)
 
     //Temporarily only pulls Apple
-    // will add stuff later to pull everything from the database to add to here
+    //TODO make it pull from the database instead
+    //Through taking the ticker and pulling in new data since obviously the close probably changed
     pullStock("AAPL")
         .onSuccess { stock -> stockList.add(stock)}
         .onFailure { error ->
             Log.e("API", "Failed to load stock", error) }
 
-    Log.d("API", stockList[0].toString())
-
     return stockList
 }
 
+//Display all the stocks in a column
 @Composable
 fun StockList(stocks: ArrayList<Stock>){
-    //Get the stock information asynchronously
-//    LaunchedEffect(Unit) {
-//        stockList = setupStockList()
-//    }
-
-    //Display all the stocks in a collumn
     Column {
         for (i in stocks) {
             StockDisplay(i)
