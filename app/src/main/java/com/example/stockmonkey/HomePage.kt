@@ -1,13 +1,11 @@
 package com.example.stockmonkey
 
-import android.content.SharedPreferences
 import android.os.Bundle
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.util.Log;
-import android.widget.Toast
 import androidx.compose.runtime.setValue;
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.padding
@@ -47,7 +45,7 @@ fun Holder(){
         TitleCard()
         StyleBar()
         StockListTopper()
-        StockButtons {  }
+        StockButtons (stocks)
         StockList(stocks)
     }
 }
@@ -77,16 +75,6 @@ fun StockListTopper(modifier: Modifier = Modifier) {
 
 }
 
-//Testing stock display made before the Stock Object was made.
-@Composable
-fun StupidStockDisplay(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = name,
-        modifier = modifier.padding(horizontal = 160.dp, vertical = 5.dp)
-    )
-}
-
-//Not final display might want to add delete button to it rather than a search based one
 @Composable
 fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     Text(
@@ -95,43 +83,42 @@ fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     )
 }
 
+//This once you press the button + will pull a stock object and add it to the stocks list
+fun addStock(stocks: ArrayList<Stock>){
+    //Do a Popup
+    //Store the popup string
+    //Pull a stock object
+    //Add it to the stocks list
+
+    //TODO make pressing the button add a predetermined stock
+}
+
+//This will pop up ask for a ticker, search the list for it and delete it if possible
+//If not it will send an error message
+fun removeStock(stocks: ArrayList<Stock>){
+    //Do a Popup
+    //Store the popup string
+    //Search from the stocks list and remove if if there is a match
+    //Else return an error
+
+    //TODO make a mockup by testing if AAPL can be removed
+}
+
+//Holder for the two buttons addStock and removeStock for a slightly prettier look
 @Composable
-fun StockButtons(onClick: () -> Unit){
+fun StockButtons(stocks: ArrayList<Stock>){
     Row(
         modifier = Modifier.padding(horizontal = 5.dp)
     ) {
-        Button(onClick = { onClick() }) {
+        Button(onClick = { addStock(stocks)}) {
             Text("+")
         }
-        Button(onClick = { onClick() }) {
+        Button(onClick = { removeStock(stocks) }) {
             Text("-")
         }
     }
 }
 
-fun StockTickerToStockConverter(){
-    //Takes a StockTicker object and turns it into a Stock object
-}
-
-fun AddStock(){
-    //Take a stock object and add it to the list.
-}
-
-fun RemoveStock(){
-    //Remove a stock object from the list, and the database
-}
-
-//@Composable
-//fun AddStockButton(onClick: () -> Unit) {
-//    Box(
-//        contentAlignment = Alignment.BottomStart, // you apply alignment to all children
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Button(onClick = { onClick() }) {
-//            Text("+")
-//        }
-//    }
-//}
 
 //Tries to asynchronously pull a single stock object
 suspend fun pullStock(ticker: String): Result<Stock> {
@@ -146,19 +133,7 @@ suspend fun pullStock(ticker: String): Result<Stock> {
         return Result.failure(e)
     }
 }
-
-var stupidList = ArrayList<String>()
-
 var stockList = ArrayList<Stock>()
-
-//This is temporary code to set up the dummy information
-// that will be replaced by the stocklist in the database
-fun setupStupidList(): ArrayList<String> {
-    stupidList.clear()
-    stupidList.add("Apple")
-    stupidList.add("Alphabet")
-    return stupidList
-}
 
 //Tries to pull from the api all the stocks by calling getStock
 //This will be replaced by pulling from the database to make the stock list
@@ -168,7 +143,8 @@ suspend fun setupStockList(): ArrayList<Stock> {
 //    stockList.add(appleTest)
 
     //Temporarily only pulls Apple
-    // will add stuff later to pull everything from the database to add to here
+    //TODO make it pull from the database instead
+    //Through taking the ticker and pulling in new data since obviously the close probably changed
     pullStock("AAPL")
         .onSuccess { stock -> stockList.add(stock)}
         .onFailure { error ->
@@ -177,14 +153,10 @@ suspend fun setupStockList(): ArrayList<Stock> {
     return stockList
 }
 
+//Display all the stocks in a column
 @Composable
 fun StockList(stocks: ArrayList<Stock>){
-    //Get the stock information asynchronously
-//    LaunchedEffect(Unit) {
-//        stockList = setupStockList()
-//    }
 
-    //Display all the stocks in a collumn
     Column {
         for (i in stocks) {
             StockDisplay(i)
