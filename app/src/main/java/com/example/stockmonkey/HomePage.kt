@@ -16,7 +16,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +40,8 @@ class HomePage : ComponentActivity() {
 @Composable
 fun Holder(){
     var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showRemoveDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         stocks = setupStockList()
@@ -47,13 +53,27 @@ fun Holder(){
         StockListTopper()
         StockButtons (
             addButton = {
-                stocks = addStock(stocks)
+                stocks = addStock(stocks, "VTI")
             },
             removeButton = {
-                stocks = removeStock(stocks)
-                Log.d("HomePage", stocks.toString())
+                showRemoveDialog = true
             }
         )
+
+        //This essentially lets the stockTickerDialogue pop up
+        //Then yeet its information into removeStock
+        if (showRemoveDialog) {
+            StockTickerDialog(
+                onDismiss = {
+                    showRemoveDialog = false
+                },
+                onConfirm = { ticker ->
+                    stocks = removeStock(stocks, ticker)
+                    showRemoveDialog = false
+                }
+            )
+        }
+
         StockList(stocks)
     }
 }
@@ -91,45 +111,78 @@ fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     )
 }
 
+@Composable
+fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
+) {
+    var ticker by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            OutlinedTextField(
+                value = ticker,
+                onValueChange = { ticker = it },
+                label = { Text("Stock ticker") },
+                placeholder = { Text("Example: AAPL") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = ticker.isNotBlank(),
+                onClick = {
+                    onConfirm(ticker.trim().uppercase())
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 //This once you press the button + will pull a stock object and add it to the stocks list
-fun addStock(stocks: ArrayList<Stock>): ArrayList<Stock> {
+fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Pull a stock object
     //Add it to the stocks list
-
+    val newStocks = ArrayList(stocks)
     Log.d("HomePage", "Inside Add Button")
 
     //TODO make pressing the button add a predetermined stock
     //Getting screams due to suspend fuckery will fix later once removeStock works
 //    pullStock("VTI")
-//        .onSuccess { stock -> stocks.add(stock)}
+//        .onSuccess { stock -> newStocks.add(stock)}
 //        .onFailure { error ->
 //            Log.e("API", "Failed to load stock", error) }
 
-    return stocks
+    return newStocks
 }
 
 //This will pop up ask for a ticker, search the list for it and delete it if possible
 //If not it will send an error message
-fun removeStock(stocks: ArrayList<Stock>): ArrayList<Stock> {
+fun removeStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Search from the stocks list and remove if if there is a match
     //Else return an error
     val newStocks = ArrayList(stocks)
 
-    Log.d("HomePage", "Inside Remove Button")
-    val ticker = "AAPL"
-    //TODO make a mockup by testing if AAPL can be removed
-
-    Log.d("HomePage", newStocks.toString())
+//    Log.d("HomePage", "Inside Remove Button")
+//
+//    Log.d("HomePage", newStocks.toString())
     for (stock in newStocks){
         if(stock.symbol == ticker){
             newStocks.remove(stock)
         }
     }
-    Log.d("HomePage", newStocks.toString())
+//    Log.d("HomePage", newStocks.toString())
     return newStocks
 }
 

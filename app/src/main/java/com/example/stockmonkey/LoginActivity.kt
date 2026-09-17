@@ -34,6 +34,8 @@ class LoginActivity : ComponentActivity() {
 
         val userDao = UserDatabase.getDatabase(this).userDao()
 
+
+
         setContent {
             StockMonkeyTheme {
                 LoginHolder(
