@@ -24,6 +24,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +45,9 @@ fun Holder(){
     var showAddDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
 
+
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         stocks = setupStockList()
     }
@@ -53,7 +58,7 @@ fun Holder(){
         StockListTopper()
         StockButtons (
             addButton = {
-                stocks = addStock(stocks, "VTI")
+                showAddDialog = true
             },
             removeButton = {
                 showRemoveDialog = true
@@ -70,6 +75,17 @@ fun Holder(){
                 onConfirm = { ticker ->
                     stocks = removeStock(stocks, ticker)
                     showRemoveDialog = false
+                }
+            )
+        }
+        if (showAddDialog) {
+            StockTickerDialog(
+                onDismiss = {
+                    showAddDialog = false
+                },
+                onConfirm = { ticker ->
+                    scope.launch { stocks = addStock(stocks, ticker) }
+                    showAddDialog = false
                 }
             )
         }
@@ -111,6 +127,7 @@ fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     )
 }
 
+//Big boy dialogue box that takes in some text input to spit back out the ticker
 @Composable
 fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
 ) {
@@ -147,7 +164,7 @@ fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
 }
 
 //This once you press the button + will pull a stock object and add it to the stocks list
-fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
+suspend fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Pull a stock object
@@ -155,12 +172,14 @@ fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
     val newStocks = ArrayList(stocks)
     Log.d("HomePage", "Inside Add Button")
 
-    //TODO make pressing the button add a predetermined stock
     //Getting screams due to suspend fuckery will fix later once removeStock works
-//    pullStock("VTI")
-//        .onSuccess { stock -> newStocks.add(stock)}
-//        .onFailure { error ->
-//            Log.e("API", "Failed to load stock", error) }
+    pullStock(ticker)
+        .onSuccess { stock -> newStocks.add(stock)}
+        .onFailure { error ->
+            Log.e("API", "Failed to load stock", error) }
+
+//    val stupidNewStock = Stock("No Name", ticker, 100.0f)
+//    newStocks.add(stupidNewStock)
 
     return newStocks
 }
