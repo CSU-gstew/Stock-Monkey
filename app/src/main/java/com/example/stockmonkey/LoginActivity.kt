@@ -284,8 +284,8 @@ fun PasswordInput(
             .fillMaxWidth()
             .padding(bottom = 20.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = Color(0xFFA376B7),
-            focusedBorderColor = Color(0xFF9885A8)
+            unfocusedBorderColor = Color(0xFF9885A8),
+            focusedBorderColor = Color(0xFF852EFF)
         )
     )
 }
