@@ -5,8 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import android.util.Log;
-import androidx.compose.runtime.setValue;
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -16,31 +17,47 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stockmonkey.ui.theme.StockMonkeyTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val name = intent.getStringExtra("LOGGED_IN_USERNAME")
         enableEdgeToEdge()
         setContent {
             StockMonkeyTheme {
-                Holder()
+                Holder(name = name)
             }
         }
     }
 }
 
 @Composable
-fun Holder(){
+fun Holder(name: String?){
     var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
@@ -52,69 +69,116 @@ fun Holder(){
         stocks = setupStockList()
     }
 
-    Column {
-        TitleCard()
-        StyleBar()
-        StockListTopper()
-        StockButtons (
-            addButton = {
-                showAddDialog = true
-            },
-            removeButton = {
-                showRemoveDialog = true
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(0.0f to Color(0xFFB1A1BA), 0.8f to Color(0xFFF3F0F4), 1.0f to Color(0xFFF3F0F4))
+            ),
+    ) {
+        BgImage()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                TitleCard(name = name)
+                StyleBar()
+                StockButtons(
+                    addButton = {
+                        showAddDialog = true
+                    },
+                    removeButton = {
+                        showRemoveDialog = true
+                    }
+                )
+
+
+                //This essentially lets the stockTickerDialogue pop up
+                //Then yeet its information into removeStock
+                if (showRemoveDialog) {
+                    StockTickerDialog(
+                        onDismiss = {
+                            showRemoveDialog = false
+                        },
+                        onConfirm = { ticker ->
+                            stocks = removeStock(stocks, ticker)
+                            showRemoveDialog = false
+                        }
+                    )
+                }
+                if (showAddDialog) {
+                    StockTickerDialog(
+                        onDismiss = {
+                            showAddDialog = false
+                        },
+                        onConfirm = { ticker ->
+                            scope.launch { stocks = addStock(stocks, ticker) }
+                            showAddDialog = false
+                        }
+                    )
+                }
+
+                StockListTopper()
+                StockList(stocks)
             }
-        )
-
-        //This essentially lets the stockTickerDialogue pop up
-        //Then yeet its information into removeStock
-        if (showRemoveDialog) {
-            StockTickerDialog(
-                onDismiss = {
-                    showRemoveDialog = false
-                },
-                onConfirm = { ticker ->
-                    stocks = removeStock(stocks, ticker)
-                    showRemoveDialog = false
-                }
-            )
         }
-        if (showAddDialog) {
-            StockTickerDialog(
-                onDismiss = {
-                    showAddDialog = false
-                },
-                onConfirm = { ticker ->
-                    scope.launch { stocks = addStock(stocks, ticker) }
-                    showAddDialog = false
-                }
-            )
-        }
-
-        StockList(stocks)
     }
 }
 
 @Composable
-fun TitleCard(modifier: Modifier = Modifier) {
+fun TitleCard(name: String?) {
+    val mainGradient = listOf(Color(0xFFA05CFF), Color(0xFF852EFF))
+
     Text(
-        text = "Home Page",
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        text = "Welcome",
+        fontSize = 30.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        modifier = Modifier
+            .padding(bottom = 16.dp)
+            .fillMaxWidth(),
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+    )
+    Text(
+        text = "$name!",
+        fontSize = 30.sp,
+        style = TextStyle(brush = Brush.verticalGradient(colors = mainGradient)),
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        modifier = Modifier
+            .padding(bottom = 16.dp)
+            .fillMaxWidth(),
+        textAlign = TextAlign.Center,
     )
 }
 
 @Composable
-fun StyleBar(modifier: Modifier = Modifier) {
-    Text(
-        text = "-------------------------------------------",
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+fun StyleBar() {
+    HorizontalDivider(
+        thickness = 3.dp,
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
 @Composable
-fun StockListTopper(modifier: Modifier = Modifier) {
+fun StockListTopper() {
     Text(
-        text = "Stock List",
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        text = "Your Tracked Stocks",
+        modifier = Modifier
+            .padding(top = 10.dp, bottom = 10.dp),
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.primary
     )
 
 }
@@ -123,7 +187,9 @@ fun StockListTopper(modifier: Modifier = Modifier) {
 fun StockDisplay(stock: Stock, modifier: Modifier = Modifier) {
     Text(
         text = stock.name + "(" + stock.symbol + ")" + ", Price: " + stock.close,
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        fontSize = 15.sp,
+        fontFamily = FontFamily.Monospace,
     )
 }
 
@@ -134,15 +200,20 @@ fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
     var ticker by remember { mutableStateOf("") }
 
     AlertDialog(
+        containerColor = Color(0xFFF3F0F4),
         onDismissRequest = onDismiss,
         text = {
             OutlinedTextField(
                 value = ticker,
                 onValueChange = { ticker = it },
-                label = { Text("Stock ticker") },
-                placeholder = { Text("Example: AAPL") },
+                label = { Text("Stock ticker", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary) },
+                placeholder = { Text("Example: AAPL", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.secondary) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color(0xFF9885A8),
+                    focusedBorderColor = Color(0xFF852EFF)
+                )
             )
         },
         confirmButton = {
@@ -152,12 +223,12 @@ fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
                     onConfirm(ticker.trim().uppercase())
                 }
             ) {
-                Text("Confirm")
+                Text("Confirm", fontFamily = FontFamily.Monospace)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", fontFamily = FontFamily.Monospace)
             }
         }
     )
@@ -209,14 +280,40 @@ fun removeStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
 @Composable
 fun StockButtons( addButton: () -> Unit, removeButton: () -> Unit
 ){
-    Row(
-        modifier = Modifier.padding(horizontal = 5.dp)
+    val mainGradient = listOf(Color(0xFFA05CFF), Color(0xFF852EFF))
+    Column(
+        modifier = Modifier.padding(top = 20.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Button(onClick = addButton) {
-            Text("+")
+        Button(
+            onClick = addButton ,
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(brush = Brush.verticalGradient(mainGradient)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text("Add Stock By Ticker",
+                fontSize = 18.sp,
+                fontFamily = FontFamily.Monospace,)
         }
-        Button(onClick = removeButton) {
-            Text("-")
+        Button(
+            onClick = removeButton,
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(brush = Brush.verticalGradient(mainGradient)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text("Remove Stock By Ticker",
+                fontSize = 18.sp,
+                fontFamily = FontFamily.Monospace,)
         }
     }
 }
@@ -226,7 +323,7 @@ fun StockButtons( addButton: () -> Unit, removeButton: () -> Unit
 suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
-            accessKey = ""
+            accessKey = "dd4a485c14e147c9a5fcd760d39570a0"
             )
 
         return Result.success(newStock)
@@ -269,6 +366,6 @@ fun StockList(stocks: ArrayList<Stock>){
 @Composable
 fun HomePreview() {
     StockMonkeyTheme {
-        Holder()
+        Holder(name = "TestUser")
     }
 }

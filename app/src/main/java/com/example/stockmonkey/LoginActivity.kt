@@ -208,7 +208,7 @@ fun LoginTitleCard() {
         modifier = Modifier
             .padding(bottom = 16.dp)
             .fillMaxWidth(),
-        color = Color(0xFF3C2253),
+        color = MaterialTheme.colorScheme.primary,
         textAlign = TextAlign.Center,
     )
     Text(
@@ -235,7 +235,7 @@ fun UsernameInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(text = "Username", fontFamily = FontFamily.Monospace, color = Color(0xFF7F6699)) },
+        label = { Text(text = "Username", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.secondary) },
         singleLine = true,
         isError = errorMessage != null,
         supportingText = {
@@ -265,7 +265,7 @@ fun PasswordInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(text = "Password", fontFamily = FontFamily.Monospace, color = Color(0xFF7F6699)) },
+        label = { Text(text = "Password", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.secondary) },
         singleLine = true,
         isError = errorMessage != null,
         supportingText = {
@@ -277,15 +277,15 @@ fun PasswordInput(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             TextButton(onClick = onToggleVisibility) {
-                Text(text = if (passwordVisible) "Hide" else "Show", fontFamily = FontFamily.Monospace, color = Color(0xFF7F6699))
+                Text(text = if (passwordVisible) "Hide" else "Show", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.secondary)
             }
         },
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 20.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = Color(0xFFA376B7),
-            focusedBorderColor = Color(0xFF9885A8)
+            unfocusedBorderColor = Color(0xFF9885A8),
+            focusedBorderColor = Color(0xFF852EFF)
         )
     )
 }
@@ -319,9 +319,10 @@ fun SignUpNavButton(
     TextButton(
         onClick = onClick,
         modifier = modifier
+            .padding(bottom = 30.dp)
     ) {
 
-        Text(text = "Create Account", fontSize = 14.sp, fontFamily = FontFamily.Monospace)
+        Text(text = "Create Account", fontSize = 14.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary)
     }
 }
 
