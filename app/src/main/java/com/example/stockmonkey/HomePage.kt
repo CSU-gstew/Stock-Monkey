@@ -40,24 +40,30 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val name = intent.getStringExtra("LOGGED_IN_USERNAME")
-        enableEdgeToEdge()
-        setContent {
-            StockMonkeyTheme {
-                Holder(name = name)
+        val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+        lifecycleScope.launch {
+            val user = userDao.getUserWID(intent.getIntExtra("LOGGED_IN_USER_ID",0))
+            val name = intent.getStringExtra("LOGGED_IN_USERNAME")
+            enableEdgeToEdge()
+            setContent {
+                StockMonkeyTheme {
+                    Holder(name = name, user)
+                }
             }
         }
+
     }
 }
 
 @Composable
-fun Holder(name: String?){
+fun Holder(name: String?, user: UserItem){
     var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
@@ -66,7 +72,7 @@ fun Holder(name: String?){
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        stocks = setupStockList()
+        stocks = setupStockList(user)
     }
 
     Box(
@@ -333,9 +339,18 @@ suspend fun pullStock(ticker: String): Result<Stock> {
     }
 }
 
+//Takes the database StockTicker object and converts it into a Stock object
+//The reason we don't have one Class is because the database cries if you change anything
+//And you can't change the name of the thing you technically could change Stock
+//Without breaking the GSON converter that relies on names to convert the JSON into a kotlin object
+fun StockTickerToStock(stockTicker: StockTicker): Stock {
+    val stock = Stock(stockTicker.companyName, stockTicker.ticker, stockTicker.eodPrice)
+    return stock
+}
+
 //Tries to pull from the api all the stocks by calling getStock
 //This will be replaced by pulling from the database to make the stock list
-suspend fun setupStockList(): ArrayList<Stock> {
+suspend fun setupStockList(user: UserItem): ArrayList<Stock> {
     var stockList = ArrayList<Stock>()
     stockList.clear()
 //    val appleTest = Stock("Apple", "AAPL", 1000.0f)
@@ -344,10 +359,16 @@ suspend fun setupStockList(): ArrayList<Stock> {
     //Temporarily only pulls Apple
     //TODO make it pull from the database instead
     //Through taking the ticker and pulling in new data since obviously the close probably changed
-    pullStock("AAPL")
-        .onSuccess { stock -> stockList.add(stock)}
-        .onFailure { error ->
-            Log.e("API", "Failed to load stock", error) }
+//    pullStock("AAPL")
+//        .onSuccess { stock -> stockList.add(stock)}
+//        .onFailure { error ->
+//            Log.e("API", "Failed to load stock", error) }
+
+    //Takes in the list converts them all to stocks and adds them
+    val tickerList = user.tickerList
+    for(ticker in tickerList){
+        stockList.add(StockTickerToStock(ticker))
+    }
 
     return stockList
 }
@@ -366,6 +387,8 @@ fun StockList(stocks: ArrayList<Stock>){
 @Composable
 fun HomePreview() {
     StockMonkeyTheme {
-        Holder(name = "TestUser")
+        Holder(
+            name = "TestUser", user = UserItem(0, "", "", List<StockTicker>(1, init = { StockTicker("AAPL", "Apple", 1.01f) }))
+        )
     }
 }
