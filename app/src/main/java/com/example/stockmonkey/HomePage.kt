@@ -115,7 +115,7 @@ fun Holder(name: String?, userDao: UserDao, user: UserItem){
                             showRemoveDialog = false
                         },
                         onConfirm = { ticker ->
-                            stocks = removeStock(stocks, ticker, user, userDao)
+                            scope.launch { stocks = removeStock(stocks, ticker, user, userDao) }
                             showRemoveDialog = false
                         }
                     )
@@ -259,6 +259,7 @@ suspend fun addStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, u
 //    val stupidNewStock = Stock("No Name", ticker, 100.0f)
 //    newStocks.add(stupidNewStock)
 
+    Log.d("Database", (stockListToStockTickerList(newStocks)).toString())
     //This should add the new stock to the users tickerList
     userDao.update(user.copy(tickerList = stockListToStockTickerList(newStocks)))
 
@@ -267,7 +268,7 @@ suspend fun addStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, u
 
 //This will pop up ask for a ticker, search the list for it and delete it if possible
 //If not it will send an error message
-fun removeStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, userDao: UserDao): ArrayList<Stock> {
+suspend fun removeStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, userDao: UserDao): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Search from the stocks list and remove if if there is a match
@@ -283,6 +284,8 @@ fun removeStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, userDa
         }
     }
 //    Log.d("HomePage", newStocks.toString())
+    userDao.update(user.copy(tickerList = stockListToStockTickerList(newStocks)))
+
     return newStocks
 }
 
