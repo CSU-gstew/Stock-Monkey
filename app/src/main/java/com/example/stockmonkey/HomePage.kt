@@ -1,5 +1,6 @@
 package com.example.stockmonkey
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 
 import androidx.activity.ComponentActivity
@@ -40,24 +41,30 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class HomePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val name = intent.getStringExtra("LOGGED_IN_USERNAME")
-        enableEdgeToEdge()
-        setContent {
-            StockMonkeyTheme {
-                Holder(name = name)
+        val userDao = UserDatabase.getDatabase(applicationContext).userDao()
+        lifecycleScope.launch {
+            val user = userDao.getUserWID(intent.getIntExtra("LOGGED_IN_USER_ID",0))
+            val name = intent.getStringExtra("LOGGED_IN_USERNAME")
+            enableEdgeToEdge()
+            setContent {
+                StockMonkeyTheme {
+                    Holder(name = name, userDao, user)
+                }
             }
         }
+
     }
 }
 
 @Composable
-fun Holder(name: String?){
+fun Holder(name: String?, userDao: UserDao, user: UserItem){
     var stocks by remember { mutableStateOf<ArrayList<Stock>>(ArrayList<Stock>()) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
@@ -66,7 +73,7 @@ fun Holder(name: String?){
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        stocks = setupStockList()
+        stocks = setupStockList(user)
     }
 
     Box(
@@ -108,7 +115,7 @@ fun Holder(name: String?){
                             showRemoveDialog = false
                         },
                         onConfirm = { ticker ->
-                            stocks = removeStock(stocks, ticker)
+                            scope.launch { stocks = removeStock(stocks, ticker, user, userDao) }
                             showRemoveDialog = false
                         }
                     )
@@ -119,7 +126,7 @@ fun Holder(name: String?){
                             showAddDialog = false
                         },
                         onConfirm = { ticker ->
-                            scope.launch { stocks = addStock(stocks, ticker) }
+                            scope.launch { stocks = addStock(stocks, ticker, user, userDao) }
                             showAddDialog = false
                         }
                     )
@@ -235,7 +242,7 @@ fun StockTickerDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit
 }
 
 //This once you press the button + will pull a stock object and add it to the stocks list
-suspend fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
+suspend fun addStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, userDao: UserDao): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Pull a stock object
@@ -252,12 +259,16 @@ suspend fun addStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock>
 //    val stupidNewStock = Stock("No Name", ticker, 100.0f)
 //    newStocks.add(stupidNewStock)
 
+    Log.d("Database", (stockListToStockTickerList(newStocks)).toString())
+    //This should add the new stock to the users tickerList
+    userDao.update(user.copy(tickerList = stockListToStockTickerList(newStocks)))
+
     return newStocks
 }
 
 //This will pop up ask for a ticker, search the list for it and delete it if possible
 //If not it will send an error message
-fun removeStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
+suspend fun removeStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem, userDao: UserDao): ArrayList<Stock> {
     //Do a Popup
     //Store the popup string
     //Search from the stocks list and remove if if there is a match
@@ -273,6 +284,8 @@ fun removeStock(stocks: ArrayList<Stock>, ticker: String): ArrayList<Stock> {
         }
     }
 //    Log.d("HomePage", newStocks.toString())
+    userDao.update(user.copy(tickerList = stockListToStockTickerList(newStocks)))
+
     return newStocks
 }
 
@@ -333,9 +346,31 @@ suspend fun pullStock(ticker: String): Result<Stock> {
     }
 }
 
+//Takes the database StockTicker object and converts it into a Stock object
+//The reason we don't have one Class is because the database cries if you change anything
+//And you can't change the name of the thing you technically could change Stock
+//Without breaking the GSON converter that relies on names to convert the JSON into a kotlin object
+fun StockTickerToStock(stockTicker: StockTicker): Stock {
+    val stock = Stock(stockTicker.companyName, stockTicker.ticker, stockTicker.eodPrice)
+    return stock
+}
+
+fun StockToStockTicker(stock: Stock): StockTicker {
+    val stockTicker = StockTicker(stock.symbol, stock.name, stock.close)
+    return stockTicker
+}
+
+fun stockListToStockTickerList(stocks: ArrayList<Stock>): List<StockTicker>{
+    val stockTickers = mutableListOf<StockTicker>();
+    for (stock in stocks){
+        stockTickers.add(StockToStockTicker(stock))
+    }
+    return stockTickers;
+}
+
 //Tries to pull from the api all the stocks by calling getStock
 //This will be replaced by pulling from the database to make the stock list
-suspend fun setupStockList(): ArrayList<Stock> {
+suspend fun setupStockList(user: UserItem): ArrayList<Stock> {
     var stockList = ArrayList<Stock>()
     stockList.clear()
 //    val appleTest = Stock("Apple", "AAPL", 1000.0f)
@@ -344,10 +379,16 @@ suspend fun setupStockList(): ArrayList<Stock> {
     //Temporarily only pulls Apple
     //TODO make it pull from the database instead
     //Through taking the ticker and pulling in new data since obviously the close probably changed
-    pullStock("AAPL")
-        .onSuccess { stock -> stockList.add(stock)}
-        .onFailure { error ->
-            Log.e("API", "Failed to load stock", error) }
+//    pullStock("AAPL")
+//        .onSuccess { stock -> stockList.add(stock)}
+//        .onFailure { error ->
+//            Log.e("API", "Failed to load stock", error) }
+
+    //Takes in the list converts them all to stocks and adds them
+    val tickerList = user.tickerList
+    for(ticker in tickerList){
+        stockList.add(StockTickerToStock(ticker))
+    }
 
     return stockList
 }
@@ -366,6 +407,8 @@ fun StockList(stocks: ArrayList<Stock>){
 @Composable
 fun HomePreview() {
     StockMonkeyTheme {
-        Holder(name = "TestUser")
+//        Holder(
+//            name = "TestUser", userDao = UserDatabase.getDatabase().userDao(), UserItem(0, "", "", List<StockTicker>(1, init = { StockTicker("AAPL", "Apple", 1.01f) }))
+//        )
     }
 }
