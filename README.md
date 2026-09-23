@@ -10,29 +10,7 @@ This is a stock tracker app that uses the https://marketstack.com/ API in order 
 
 We got styling help for this document from [this guide](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
 
-## Introduction
-
-* How was communication managed
-  * Initially text messages but once difficulties with different OS's popped up we switched to Google Chat.
-* How many stories/issues were initially considered
-  * 14
-* How many stories/issues were completed
-  * 27
-## Team Retrospective
-
-### Team Member name
-
-- [a link to your pull requests]()
-- [a link to your issues]()
-
-#### What was your role / which stories did you work on
-
-+ What was the biggest challenge? 
-+ Why was it a challenge?
-  + How was the challenge addressed?
-+ Favorite / most interesting part of this project
-+ If you could do it over, what would you change?
-+ What is the most valuable thing you learned?
+### Introduction
 
 ### Alexey Berezhnoy, Alyosha-ctrl
 
@@ -55,6 +33,7 @@ I worked on the Home Page and the API.
 + What is the most valuable thing you learned?
   + Freak out less, and run code more. 
 
+
 ### Annabelle Baltes, annabelleb20
 
 - [pull requests](https://github.com/CSU-gstew/Stock-Monkey/pulls?q=is%3Apr+state%3Aclosed+author%3Aannabelleb20)
@@ -76,7 +55,33 @@ I worked on setting up the database, providing database insight when needed, and
 + What is the most valuable thing you learned?
   + That unit tests matter A LOT more than I thought, and can be helpful to find out what's wrong with your code before pushing everything anyways. Also how to set up a Room database.
 
-## Hyun Jeong Lim
+
+### Gideon Stewman, CSU-Gstew
+
+- [pull requests](https://github.com/CSU-gstew/Stock-Monkey/pulls?q=is%3Apr+state%3Aclosed+author%3ACSU-gstew)
+- [issues](https://github.com/CSU-gstew/Stock-Monkey/issues?q=is%3Aissue+state%3Aclosed+assignee%3ACSU-gstew)
+
+  
+### What was your role / which stories did you work on
+
+I implemented the LoginPage Activity and connected it to the HomePage and CreateAccount page, as well as completing the required Static Analysis work and adding a logout button to the home page. I also helped fix bugs wherever they popped up and proofread my teammate's code.
+
++ What was the biggest challenge?
+   - The biggest challenge for me was implementing Composeable UI into my Activity class
+     
+   + Why was it a challenge?
+        - It was challenging for me because I have always used .xmls for all UI in Android Studio, so moving to a new system I wasn't familiar with was hard.
+   + How was the challenge addressed?
+        - I used Azreal's implementation of his HomePage composable UI as a stepping stone and built my own UI off of that, understanding it more as I went.
++ Favorite / most interesting part of this project
+        - We had a week or two where everything we had was disconnected which meant we couldn't test the full app, but once we had finished connecting everything, it felt really good to be able to test all of our individual sections as one complete project.
++ If you could do it over, what would you change?
+        - I would make sure we had clear stepping stones at the beginning of each week so everyone was clear on what to work on. Early on, we had some confusion about what to work on next, which led to some miscommunications regarding implementation and multiple people working on the same thing.
++ What is the most valuable thing you learned?
+        - Likely Composeable UI as well as Static Analysis, both will be helpful for future projects.
+
+
+### Hyun Jeong Lim
 
 1. Hyun Jeong's pull requests are [here](https://github.com/CSU-gstew/Stock-Monkey/pulls?q=is%3Apr+author%3AJacklen-lim)
 2. Hyun Jeong's Github issues are [here](https://github.com/CSU-gstew/Stock-Monkey/issues?q=is%3Aissue+assignee%3AJacklen-lim)
@@ -111,28 +116,8 @@ why sign up failed.
   - How to work in a team Git workflow: one branch per issue, clear PR descriptions, 
     and code review.
 
-### Carol Danvers
-1. Carol's pull requests are [here](https://github.com/Jonathan-Welham/Bits-Bots/pulls/@CarolDanvers)
-1. Carol's Github issues are [here](https://github.com/FedericoRubino/cst438_project2/issues/created_by/@FedericoRubino)
 
-#### What was your role / which stories did you work on
-Carol mostly worked on getting the app to run faster, better, and higher.  She did the best work possible but her contributions were overpowered and not well received by the fans.
-
-+ What was the biggest challenge? 
-  + Managing pull requests and merges
-+ Why was it a challenge?
-  + We were all new to git/github and not everyone followed convention
-  + How was the challenge addressed?
-  + I went to the TA for help and used ChatGPT and web resources to get more comfortable with git.
-+ Favorite / most interesting part of this project
-  + Finally getting the IDs from the API calls to store in the ROOM database
-+ If you could do it over, what would you change?
-  + I would get the ROOM database setup FIRST
-+ What is the most valuable thing you learned?
-  + Do the work early and document EVERYTHING
-
-
-## Conclusion
+#### Conclusion
 
 - How successful was the project?
   - Think in terms of what did you set out to do and what actually got done?
