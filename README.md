@@ -76,6 +76,40 @@ I worked on setting up the database, providing database insight when needed, and
 + What is the most valuable thing you learned?
   + That unit tests matter A LOT more than I thought, and can be helpful to find out what's wrong with your code before pushing everything anyways. Also how to set up a Room database.
 
+## Hyun Jeong Lim
+
+1. Hyun Jeong's pull requests are [here](https://github.com/CSU-gstew/Stock-Monkey/pulls?q=is%3Apr+author%3AJacklen-lim)
+2. Hyun Jeong's Github issues are [here](https://github.com/CSU-gstew/Stock-Monkey/issues?q=is%3Aissue+assignee%3AJacklen-lim)
+
+### What was your role / which stories did you work on
+
+I worked on the Sign Up feature. I built the Sign Up screen, wrote the password 
+validation (8–20 characters, at least one number and one special character), and 
+connected account creation to the Room database so the app checks for duplicate 
+usernames before saving a new user. I also added error dialogs that tell the user 
+why sign up failed.
+
+- What was the biggest challenge?
+  - Connecting the Sign Up screen to the Room database
+- Why was it a challenge?
+  - I had to make sure the duplicate username check finished before a new user was 
+    saved, and that the result showed correctly on the screen. Gideon's login code 
+    also depended on sign up working, so the whole login flow couldn't be tested 
+    until my part was done.
+  - How was the challenge addressed?
+    - I tested each step separately (validation, duplicate check, saving the user) 
+      and checked the results in the Database Inspector until everything worked 
+      together.
+- Favorite / most interesting part of this project
+  - Creating an account on my Sign Up screen and then logging in with it using my 
+    teammate's login code. It made the project feel like one connected app.
+- If you could do it over, what would you change?
+  - I would write unit tests for my validation logic while building it instead of 
+    only testing manually, and set up .gitignore properly from the start since I 
+    accidentally pushed some .idea files.
+- What is the most valuable thing you learned?
+  - How to work in a team Git workflow: one branch per issue, clear PR descriptions, 
+    and code review.
 
 ### Carol Danvers
 1. Carol's pull requests are [here](https://github.com/Jonathan-Welham/Bits-Bots/pulls/@CarolDanvers)
