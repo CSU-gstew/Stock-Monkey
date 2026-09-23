@@ -1,5 +1,6 @@
 package com.example.stockmonkey
 
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -69,8 +71,9 @@ fun Holder(name: String?, userDao: UserDao, user: UserItem){
     var showAddDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
 
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val mainGradient = listOf(Color(0xFFA05CFF), Color(0xFF852EFF))
 
     LaunchedEffect(Unit) {
         stocks = setupStockList(user)
@@ -134,6 +137,34 @@ fun Holder(name: String?, userDao: UserDao, user: UserItem){
 
                 StockListTopper()
                 StockList(stocks)
+            }
+
+            // Centered bottom logout button
+            Button(
+                onClick = {
+                    val intent = Intent(context, LoginActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    context.startActivity(intent)
+                    (context as? ComponentActivity)?.finish()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .clip(RoundedCornerShape(8.dp))
+                    .width(180.dp)
+                    .height(48.dp)
+                    .background(brush = Brush.verticalGradient(mainGradient)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Text(
+                    "Log Out",
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }
@@ -278,11 +309,7 @@ suspend fun removeStock(stocks: ArrayList<Stock>, ticker: String, user: UserItem
 //    Log.d("HomePage", "Inside Remove Button")
 //
 //    Log.d("HomePage", newStocks.toString())
-    for (stock in newStocks){
-        if(stock.symbol == ticker){
-            newStocks.remove(stock)
-        }
-    }
+    newStocks.removeAll { it.symbol == ticker }
 //    Log.d("HomePage", newStocks.toString())
     userDao.update(user.copy(tickerList = stockListToStockTickerList(newStocks)))
 
@@ -337,7 +364,7 @@ suspend fun pullStock(ticker: String): Result<Stock> {
     try {
         val newStock = RetrofitClient.api.getStock(ticker = ticker,
             accessKey = "dd4a485c14e147c9a5fcd760d39570a0"
-            )
+        )
 
         return Result.success(newStock)
     } catch (e: Exception) {
